@@ -140,12 +140,12 @@ def unsharp(gray, sigma, amount):
 # --------------------------------------------------------------------------
 # Pipeline
 # --------------------------------------------------------------------------
-def procesar(gray, args):
+def procesar(gray, no_rotar = False, margen=0.05,suavizado=0.8,sharp_sigma=1.5,sharp_cantidad=1.5,size=0):
     mask = mascara_huella(gray)
     if mask is None:
         raise ValueError("no se detectó ninguna huella")
 
-    if not args.no_rotar:
+    if not no_rotar:
         ang = angulo_para_vertical(mask)
         M, dsize = matriz_rotacion_expandida(gray.shape, ang)
         gray = cv2.warpAffine(gray, M, dsize, flags=cv2.INTER_CUBIC,
@@ -153,48 +153,39 @@ def procesar(gray, args):
         mask = cv2.warpAffine(mask, M, dsize, flags=cv2.INTER_NEAREST,
                               borderMode=cv2.BORDER_CONSTANT, borderValue=0)
 
-    out = recortar(gray, mask, args.margen)
-    out = suavizar(out, args.suavizado)
-    out = unsharp(out, args.sharp_sigma, args.sharp_cantidad)
+    out = recortar(gray, mask, margen)
+    out = suavizar(out, suavizado)
+    out = unsharp(out, sharp_sigma, sharp_cantidad)
 
-    if args.size:
-        out = a_cuadrado(out, args.size)
+    if size:
+        out = a_cuadrado(out, size)
     return out
 
 
-def main():
-    ap = argparse.ArgumentParser(description="Rota, recorta, suaviza y afila huellas.")
-    ap.add_argument("entrada", type=Path, help="Imagen o carpeta de imágenes")
-    ap.add_argument("salida", type=Path, help="Carpeta de salida")
-    ap.add_argument("--margen", type=float, default=0.05,
-                    help="Margen del recorte como fracción del tamaño de la huella (def. 0.05)")
-    ap.add_argument("--suavizado", type=float, default=0.8,
-                    help="Sigma del Gaussiano de suavizado; 0 = sin suavizado (def. 0.8)")
-    ap.add_argument("--sharp-sigma", type=float, default=1.5,
-                    help="Sigma del desenfoque base del unsharp mask (def. 1.5)")
-    ap.add_argument("--sharp-cantidad", type=float, default=1.5,
-                    help="Intensidad del sharpening; 0 = sin sharpening (def. 1.5)")
-    ap.add_argument("--size", type=int, default=0,
-                    help="Si se indica, salida cuadrada size x size con fondo blanco")
-    ap.add_argument("--no-rotar", action="store_true", help="No rotar la huella")
-    args = ap.parse_args()
-
-    if args.entrada.is_dir():
-        archivos = sorted(p for p in args.entrada.iterdir() if p.suffix.lower() in EXTS)
-    else:
-        archivos = [args.entrada]
-
-    args.salida.mkdir(parents=True, exist_ok=True)
-    ok = 0
-    for p in archivos:
-        try:
-            res = procesar(leer_gris(p), args)
-            cv2.imwrite(str(args.salida / (p.stem + ".png")), res)
-            ok += 1
-        except Exception as e:
-            print(f"[!] {p.name}: {e}")
-    print(f"Listo: {ok}/{len(archivos)} imágenes procesadas -> {args.salida}")
-
-
 if __name__ == "__main__":
-    main()
+    #main()
+    path_base="C:/Users/Pablo/Documents/GitHub/DetectorHuellas-ProyectoIA/Huellas"
+
+
+    entradas = ["/VariantesPermitidas_Ordenada/Simuladas/huella_1","/VariantesPermitidas_Ordenada/Simuladas/huella_2","/VariantesPermitidas_Ordenada/Simuladas/huella_3"]
+    salidas=["/VariantesPermitidas_Tomadas/huella_1","/VariantesPermitidas_Tomadas/huella_2","/VariantesPermitidas_Tomadas/huella_3"]
+
+    for i in range(0,len(entradas)):
+        entrada=Path(path_base+entradas[i])
+        salida=Path(path_base+salidas[i])
+        print(entrada)
+        if entrada.is_dir():
+            archivos = sorted(p for p in entrada.iterdir() if p.suffix.lower() in EXTS)
+        else:
+            archivos = [entrada]
+    
+        salida.mkdir(parents=True, exist_ok=True)
+        ok = 0
+        for p in archivos:
+            try:
+                res = procesar(leer_gris(p),size=200,margen=0)
+                cv2.imwrite(str(salida / (p.stem + ".png")), res)
+                ok += 1
+            except Exception as e:
+                print(f"[!] {p.name}: {e}")
+        print(f"Listo: {ok}/{len(archivos)} imágenes procesadas -> {salida}")

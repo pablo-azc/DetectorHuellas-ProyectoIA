@@ -80,10 +80,11 @@ if __name__ == "__main__":
     # -------------------------------------------------------------
     # CONFIGURACIÓN
     # -------------------------------------------------------------
-    RUTA_ORIGEN = r"VariantesPermitidas/Complejas"
+    path_base="C:/Users/Pablo/Documents/GitHub/DetectorHuellas-ProyectoIA/Huellas/"
+    RUTA_ORIGEN = "VariantesPermitidas/Complejas"
     
     # Deja None para crear una carpeta paralela con el dataset limpio
-    RUTA_DESTINO = r"VariantesPermitidas_Ordenada/Complejas" 
+    RUTA_DESTINO = "VariantesPermitidas_Ordenada/Complejas" 
     
     # 'fp_' resultará en carpetas "fp_1", "fp_2"... 
     # Puedes cambiarlo por "huella_" si lo prefieres
@@ -94,8 +95,8 @@ if __name__ == "__main__":
     # -------------------------------------------------------------
 
     reorganizar_anguli_por_nombre_archivo(
-        RUTA_ORIGEN, 
-        RUTA_DESTINO, 
+        path_base+RUTA_ORIGEN, 
+        path_base+RUTA_DESTINO, 
         mover=MOVER, 
         prefijo_huella=PREFIJO
     )

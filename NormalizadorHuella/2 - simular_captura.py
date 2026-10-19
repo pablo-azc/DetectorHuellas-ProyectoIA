@@ -86,14 +86,10 @@ def procesar_dataset_completo(directorio_origen: str, directorio_destino: str):
         )
 
 if __name__ == "__main__":
-    # --- EJEMPLO 1: Para probar con una sola imagen ---
-    #simular_captura_real(
-    #    ruta_imagen="3_1.jpg", 
-    #    ruta_salida="3_1_simulada.jpg", 
-    #    angulo_max=90.0
-    #)
+
+    path_base="C:/Users/Pablo/Documents/GitHub/DetectorHuellas-ProyectoIA/Huellas/"
 
     # --- EJEMPLO 2: Para procesar todo tu dataset reorganizado ---
-    RUTA_ORIGEN = r"VariantesPermitidas_Ordenada\Complejas"
-    RUTA_DESTINO = r"VariantesPermitidas_Ordenada\Simuladas"
-    procesar_dataset_completo(RUTA_ORIGEN, RUTA_DESTINO)
+    RUTA_ORIGEN = "VariantesPermitidas_Ordenada/Complejas"
+    RUTA_DESTINO = "VariantesPermitidas_Ordenada/Simuladas"
+    procesar_dataset_completo(path_base+RUTA_ORIGEN, path_base+RUTA_DESTINO)
