@@ -2,7 +2,7 @@ import os
 import re
 import numpy as np
 
-dir_base = "BaseDatosOrdenada"
+dir_base = r"C:\Users\Pablo\Documents\GitHub\DetectorHuellas-ProyectoIA\NormalizadorAudio\BaseDatosOrdenada"
 
 def parsear_entrada(texto):
     """

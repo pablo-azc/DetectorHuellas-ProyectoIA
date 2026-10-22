@@ -3,6 +3,16 @@ import numpy as np
 import os
 import glob
 
+def maximoInternoEnHuella(lista):
+    maximo=0
+    ganador=0
+    for i in range(3):
+        if lista[i]>maximo:
+            maximo=lista[i]
+            ganador=i+1
+    return ganador
+
+
 def extraer_minucias_directorio(dir_entrada, dir_salida,archivoProm):
     """
     Procesa un directorio de huellas, identifica terminaciones y bifurcaciones,
@@ -77,34 +87,61 @@ def extraer_minucias_directorio(dir_entrada, dir_salida,archivoProm):
         y_h, x_h = np.where(horizonales)
         y_t, x_t = np.where(totales)
 
-        count_izq = 0
-        count_der = 0
-        count_horiz = 0
+        ##Divide la huella en una matriz de 8 x 8
+        limite_y_min=y_t.min()
+        limite_y_max=y_t.max()
+        limite_x_min=x_t.min()
+        limite_x_max=x_t.max()
+        deltay=int((limite_y_max-limite_y_min)/8)
+        deltax=int((limite_x_max-limite_x_min)/8)
 
-        # Dibujar Terminaciones (Fines de línea) en ROJO
+        ##Matriz: huella[0][0]=[cuentaDer,cuentaIzq,cuentaHor]
+        huella=[]
+        for indice_x_huella in range(8):
+            huella.append([])
+            for indice_y_huella in range(8):
+                huella[indice_x_huella].append([])
+                huella[indice_x_huella][indice_y_huella]=[0,0,0]
+
+        # Dibujar Derecha (Fines de línea) en ROJO
         for x, y in zip(x_d, y_d):
             cv2.circle(resultado_color, (x, y), 3, (0, 0, 255), -1)
-            count_izq += 1
+            for indice_x_huella in range(8):
+                if (x>limite_x_min+(indice_x_huella)*deltax) and (x<limite_x_min+(indice_x_huella+1)*deltax):
+                    for indice_y_huella in range(8):
+                        if (y>limite_y_min+(indice_y_huella)*deltay) and (y<limite_y_min+(indice_y_huella+1)*deltay):
+                            huella[indice_x_huella][indice_y_huella][0] += 1
 
         # Dibujar Bifurcaciones (Uniones) en AZUL
         for x, y in zip(x_i, y_i):
             cv2.circle(resultado_color, (x, y), 3, (255, 0, 0), -1)
-            count_der += 1
+            for indice_x_huella in range(8):
+                if (x>limite_x_min+(indice_x_huella)*deltax) and (x<limite_x_min+(indice_x_huella+1)*deltax):
+                    for indice_y_huella in range(8):
+                        if (y>limite_y_min+(indice_y_huella)*deltay) and (y<limite_y_min+(indice_y_huella+1)*deltay):
+                            huella[indice_x_huella][indice_y_huella][1] += 1
 
         # Dibujar Bifurcaciones (Uniones) en AZUL
         for x, y in zip(x_h, y_h):
             cv2.circle(resultado_color, (x, y), 3, (0, 255, 0), -1)
-            count_horiz += 1
+            for indice_x_huella in range(8):
+                if (x>limite_x_min+(indice_x_huella)*deltax) and (x<limite_x_min+(indice_x_huella+1)*deltax):
+                    for indice_y_huella in range(8):
+                        if (y>limite_y_min+(indice_y_huella)*deltay) and (y<limite_y_min+(indice_y_huella+1)*deltay):
+                            huella[indice_x_huella][indice_y_huella][2] += 1
 
-        count_total= x_t.size
+
 
         # Guardar imagen resultante
         ruta_guardado = os.path.join(dir_salida, f"minucias_{nombre_archivo}")
         cv2.imwrite(ruta_guardado, resultado_color)
         print(f"  -> Guardado en: {ruta_guardado}")
-        suma=count_horiz+count_izq+count_der
-        archivoProm.write(f"{count_izq/suma},{count_der/suma},{count_horiz/suma}\n")
-        #print(f"{count_izq/suma},{count_der/suma},{count_horiz/suma}")
+        archivoProm.write("{\n")
+        for indice_y_huella in range(8):
+            for indice_x_huella in range(8):
+                archivoProm.write(f"{maximoInternoEnHuella(huella[indice_x_huella][indice_y_huella])}\t")
+            archivoProm.write("\n")
+        archivoProm.write("\n}\n")
     archivoProm.close()
 
 if __name__ == '__main__':

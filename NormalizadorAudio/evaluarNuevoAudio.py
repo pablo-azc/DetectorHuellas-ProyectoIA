@@ -6,7 +6,7 @@ import CapturaAudio
 
 
 
-dir_base = "BaseDatosOrdenada"
+dir_base = r"C:\Users\Pablo\Documents\GitHub\DetectorHuellas-ProyectoIA\NormalizadorAudio\BaseDatosOrdenada"
 clases_esperadas = ["reconocer", "identificar", "salir"]
 
 def parsear_entrada(texto):
