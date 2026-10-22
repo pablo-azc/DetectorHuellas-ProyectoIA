@@ -24,13 +24,13 @@ def extraer_minucias_directorio(dir_entrada, dir_salida,archivoProm):
 
     # Definir el kernel de 3x3 para contar pixeles vecinos en el esqueleto
     kernel_izquierdo = np.array([[1, 0, 0],
-                               [0, 0, 0],
-                               [0, 0, 1]], dtype=np.uint8)
+                                 [0, 1, 0],
+                                 [0, 0, 1]], dtype=np.uint8)
     kernel_derecho = np.array([[0, 0, 1],
-                                [0, 0, 0],
+                                [0, 1, 0],
                                 [1, 0, 0]], dtype=np.uint8)
     kernel_Horizontal   = np.array([[0, 0, 0],
-                                    [1, 0, 1],
+                                    [1, 1, 1],
                                     [0, 0, 0]], dtype=np.uint8)
 
     for ruta in archivos:
@@ -64,7 +64,7 @@ def extraer_minucias_directorio(dir_entrada, dir_salida,archivoProm):
         # - si concuerda exactamente con el planteo, se considera correcto
         derechos = (esqueleto_norm == 1) & (conteo_derecho == 2)
         izquierdo = (esqueleto_norm == 1) & (conteo_izquierdo == 2)
-        horizonales = (esqueleto_norm == 1) & (conteo_horiz == 2)
+        horizonales = (esqueleto_norm == 1) & (conteo_horiz == 3)
         totales = (esqueleto_norm == 1)
 
         # 5. Dibujo visual de resultados
