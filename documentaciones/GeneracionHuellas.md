@@ -36,3 +36,5 @@ Basado en eso, se creo un script de python que las convierta en algo mas similar
 Basado en el proceso anterior, se recorta la imagen y se rota. Para lograr eso, simplemente busca el ancho minimo. Esto tiene la desventaja de que las imagenes giradas tienen una variacion importante: puede estar girada 0° o 180°
 ### Blur y Sharpening
 La siguiente etapa para la normalizacion es aplicar un efecto de Blur para disolver el ruido "sal y pimienta", 
+### Binariacion
+Se consideró directamente hacer que la imagen se convierta de forma que solo queden los bordes "filosos", donde solo cuando se supere un umbral se considere "negro"

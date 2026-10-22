@@ -136,7 +136,6 @@ def unsharp(gray, sigma, amount):
     blur = cv2.GaussianBlur(gray, (0, 0), sigmaX=sigma)
     return cv2.addWeighted(gray, 1.0 + amount, blur, -amount, 0)  # saturate_cast a uint8
 
-
 # --------------------------------------------------------------------------
 # Pipeline
 # --------------------------------------------------------------------------
@@ -159,6 +158,10 @@ def procesar(gray, no_rotar = False, margen=0.05,suavizado=0.8,sharp_sigma=1.5,s
 
     if size:
         out = a_cuadrado(out, size)
+        
+    # NUEVO: Binarización estricta (Otsu) para asegurar que solo haya 0 (negro) o 255 (blanco)
+    _, out = cv2.threshold(out, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    
     return out
 
 
