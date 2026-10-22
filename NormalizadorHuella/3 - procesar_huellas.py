@@ -186,7 +186,7 @@ if __name__ == "__main__":
         ok = 0
         for p in archivos:
             try:
-                res = procesar(leer_gris(p),size=200,margen=0)
+                res = procesar(leer_gris(p),size=200,margen=0,suavizado=1.2,sharp_cantidad=1)
                 cv2.imwrite(str(salida / (p.stem + ".png")), res)
                 ok += 1
             except Exception as e:
