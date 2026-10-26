@@ -43,8 +43,8 @@ def calcular_estadisticos_y_mascara():
         std = np.std(X, axis=0)
         
         # Máscara basada en 2 desviaciones estándar
-        limite_inferior = media - (1 * std)
-        limite_superior = media + (1 * std)
+        limite_inferior = media - (1.5 * std)
+        limite_superior = media + (1.5 * std)
         
         print(f"\n==========================================")
         print(f" ETIQUETA: {etiqueta.upper()} ")

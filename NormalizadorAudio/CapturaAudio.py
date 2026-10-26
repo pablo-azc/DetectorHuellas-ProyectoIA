@@ -5,11 +5,12 @@ import noisereduce as nr
 import time
 import os
 import soundfile as sf
+from ProcesadorAudio import extraer_vector_ventanas
 
 def capturar_comando_voz(duracion_total=3.5, duracion_ruido=2, countdown=3, fs=16000, grabar=True, carpeta_grabar="Audios"):
     """
     Captura audio del micrófono, reduce el ruido ambiental, recorta silencios 
-    y devuelve un vector de características unidimensional basado en MFCC.
+    y devuelve un vector de características basado en 3 ventanas de 0.25s (MFCCs).
     """
 
     if grabar:
@@ -17,60 +18,47 @@ def capturar_comando_voz(duracion_total=3.5, duracion_ruido=2, countdown=3, fs=1
 
     print("\n--- Preparando micrófono ---")
     print("Preparese para algun comando ('Reconocer', 'Identificar' o 'Salir')...")
-    for i in range(countdown,countdown-duracion_ruido,-1):
+    for i in range(countdown, countdown - duracion_ruido, -1):
         time.sleep(1) 
         print(f"{i}...")
 
-    print(f"{countdown-duracion_ruido}...")
-    #print("[DEBUG] Capturando Ruido")
+    print(f"{countdown - duracion_ruido}...")
+    # Capturando perfil de ruido ambiental
     ruido = sd.rec(int(duracion_ruido * fs), samplerate=fs, channels=1, dtype='float32')
     sd.wait()
+    
     # 1. Captura de Audio
     print("🔴 GRABANDO: ('Reconocer', 'Identificar' o 'Salir')...")
     grabacion = sd.rec(int(duracion_total * fs), samplerate=fs, channels=1, dtype='float32')
     sd.wait()
-    #conjunto=ruido+grabacion
-    #audio = conjunto.flatten()
     print("✅ Grabación finalizada.")
 
-    
-
     # 2. Sustracción Espectral de Ruido
-    # Tomamos la primera fracción del audio como perfil de ruido ambiental
-    #muestras_ruido = int(duracion_ruido * fs)
-    #perfil_ruido = audio[:muestras_ruido]
-    
-    # noisereduce aplica FFT, calcula la densidad del ruido y la resta del espectrograma
-    audio_limpio = nr.reduce_noise(y=grabacion.flatten(), sr=fs, y_noise=ruido)
+    audio_limpio = nr.reduce_noise(y=grabacion.flatten(), sr=fs, y_noise=ruido.flatten())
 
     if grabar:
         sf.write(os.path.join(carpeta_grabar, "1_ruido.wav"), ruido, fs)
         sf.write(os.path.join(carpeta_grabar, "2_audioRaw.wav"), grabacion, fs)
         sf.write(os.path.join(carpeta_grabar, "3_audioLimpio.wav"), audio_limpio, fs)
 
-    # 3. Recorte de Silencios (Voice Activity Detection)
-    # top_db define el umbral (en dB) por debajo del cual se considera silencio
-    audio_recortado, _ = librosa.effects.trim(audio_limpio, top_db=20)
-    
-    # Verificación de seguridad: si el recorte borró todo el audio (ej. no se habló)
-    if len(audio_recortado) < (fs * 0.2):
+    # 3. Extracción de características por ventanas (3 ventanas de 0.25s tras trim)
+    vector_caracteristicas = extraer_vector_ventanas(
+        audio_limpio=audio_limpio, 
+        fs=fs, 
+        n_ventanas=3, 
+        duracion_ventana=0.25, 
+        top_db=20, 
+        n_mfcc=13
+    )
+
+    if vector_caracteristicas is None:
         print("⚠️ Advertencia: No se detectó voz o el comando es demasiado corto.")
         return None
 
+    # Guardar audio recortado por referencia si se desea
     if grabar:
-            sf.write(os.path.join(carpeta_grabar, "4_audioCortado.wav"), audio_recortado, fs)
-
-    # 4. Extracción de MFCCs
-    # Se obtienen 13 coeficientes Mel, lo estándar para voz humana
-    mfccs = librosa.feature.mfcc(y=audio_recortado, sr=fs, n_mfcc=13, n_fft=1024, hop_length=256)
-
-    # 5. Aplanado para K-NN (Vector de longitud fija)
-    # Calculamos la media y la desviación estándar temporal de cada coeficiente
-    mfccs_media = np.mean(mfccs, axis=1)
-    mfccs_std = np.std(mfccs, axis=1)
-    
-    # Vector final de 26 dimensiones (13 medias + 13 desviaciones)
-    vector_caracteristicas = np.concatenate((mfccs_media, mfccs_std))
+        audio_recortado, _ = librosa.effects.trim(audio_limpio, top_db=20)
+        sf.write(os.path.join(carpeta_grabar, "4_audioCortado.wav"), audio_recortado, fs)
 
     return vector_caracteristicas
 

@@ -8,3 +8,6 @@ AudiosPersonas/
 NormalizadorAudio/Audios/
 NormalizadorAudio/AudiosPersonas/
 BaseDatosOrdenada/
+DatasetVectores/
+__pycache__/
+NormalizadorAudio/__pycache__/

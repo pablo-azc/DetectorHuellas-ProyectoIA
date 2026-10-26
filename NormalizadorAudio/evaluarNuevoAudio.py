@@ -1,72 +1,51 @@
 import os
-import re
+import sys
 import numpy as np
 
+# Asegurar path local
+sys.path.append(os.path.dirname(__file__))
+
 import CapturaAudio
+from ClasificadorVoz import ClasificadorVoz
 
+dir_dataset = os.path.join(os.path.dirname(__file__), "DatasetVectores")
+ruta_modelo = os.path.join(dir_dataset, "modelo_voz.npy")
 
-
-dir_base = r"C:\Users\Pablo\Documents\GitHub\DetectorHuellas-ProyectoIA\NormalizadorAudio\BaseDatosOrdenada"
-clases_esperadas = ["reconocer", "identificar", "salir"]
-
-def parsear_entrada(texto):
+def clasificar_vector(vector):
     """
-    Limpia el formato y convierte el texto en un array de NumPy.
+    Recibe un vector de características (39 valores) y devuelve la predicción.
     """
-    texto_limpio = re.sub(r'[\{\}\[\]\n]', ' ', texto)
-    valores = [float(x) for x in texto_limpio.split()]
-    return np.array(valores)
+    if not os.path.exists(ruta_modelo):
+        print(f"Error: No se encontró el modelo entrenado en '{ruta_modelo}'.")
+        print("Ejecuta 'ClasificadorVoz.py' para entrenar y generar el modelo.")
+        return None, None
 
-def evaluar_nuevo_audio(texto_nuevo):
-    nuevo_vector = parsear_entrada(texto_nuevo)
+    clasificador = ClasificadorVoz.cargar_modelo(ruta_modelo)
+    clase_predicha, distancias = clasificador.predecir_uno(vector)
     
-    print(f"Tamaño del vector nuevo: {len(nuevo_vector)} valores.")
-    print("-" * 40)
+    return clase_predicha, distancias
+
+def evaluar_en_vivo():
+    """
+    Captura audio del micrófono y lo clasifica en tiempo real.
+    """
+    print("Iniciando captura de audio...")
+    vector = CapturaAudio.capturar_comando_voz(grabar=True, carpeta_grabar="Audios/EnVivo")
     
-    resultados = {}
+    if vector is None:
+        print("No se pudo obtener un vector válido de audio.")
+        return
 
-    for etiqueta in clases_esperadas:
-        ruta_inf = os.path.join(dir_base, etiqueta, "mascara_limite_inf.npy")
-        ruta_sup = os.path.join(dir_base, etiqueta, "mascara_limite_sup.npy")
-
-        # Verificar que las máscaras existan
-        if not (os.path.exists(ruta_inf) and os.path.exists(ruta_sup)):
-            print(f"[{etiqueta.upper()}] -> No se encontraron las máscaras calculadas.")
-            continue
-
-        # Cargar los límites
-        limite_inferior = np.load(ruta_inf)
-        limite_superior = np.load(ruta_sup)
-
-        # Verificar que el vector nuevo tenga la misma cantidad de datos que las máscaras
-        if len(nuevo_vector) != len(limite_inferior):
-            print(f"[{etiqueta.upper()}] -> Error de dimensión. Esperado: {len(limite_inferior)}, Recibido: {len(nuevo_vector)}.")
-            continue
-
-        # Aplicar la máscara booleana
-        mascara = (nuevo_vector >= limite_inferior) & (nuevo_vector <= limite_superior)
-        
-        # Calcular porcentaje
-        porcentaje_coincidencia = np.mean(mascara) * 100
-        resultados[etiqueta] = porcentaje_coincidencia
-        
-        print(f"[{etiqueta.upper()}] -> {porcentaje_coincidencia:.2f}% de los valores están dentro del rango.")
-
-    print("-" * 40)
+    clase, distancias = clasificar_vector(vector)
     
-    # Determinar la clase ganadora
-    #if resultados:
-    #    clase_ganadora = max(resultados, key=resultados.get)
-    #    porcentaje_max = resultados[clase_ganadora]
-        
-    #    print(f"RESULTADO: El audio se clasifica como '{clase_ganadora.upper()}' ({porcentaje_max:.2f}% de similitud estadística).")
-    #else:
-    #    print("No se pudo evaluar el audio contra ninguna clase.")
+    print("\n" + "=" * 45)
+    print(" RESULTADO DE LA CLASIFICACIÓN")
+    print("=" * 45)
+    print(f"Comando detectado: >>> {clase.upper()} <<<")
+    print("\nDistancias relativas a cada clase (menor es más cercano):")
+    for c, dist in distancias.items():
+        print(f"  - {c.capitalize():<12}: {dist:.2f}")
+    print("=" * 45 + "\n")
 
 if __name__ == "__main__":
-    # Aquí pegas el contenido del archivo datosCompletos de tu audio nuevo.
-    # Usé el ejemplo que me pasaste antes para probar.
-    dato_prueba = f"{CapturaAudio.capturar_comando_voz()}"
-    
-    print("Evaluando muestra de prueba...\n")
-    evaluar_nuevo_audio(dato_prueba)
+    evaluar_en_vivo()
