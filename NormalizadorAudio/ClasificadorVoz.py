@@ -14,56 +14,65 @@ class ClasificadorVoz:
         self.clases = None
         self.centroides = {}
         self.desviaciones = {}
+        self.mean_global = None
+        self.std_global = None
         self.X_train = None
+        self.X_train_scaled = None
         self.y_train = None
 
     def entrenar(self, X, y):
-        """
-        Ajusta el modelo con los datos de entrenamiento X e y.
-        """
         self.X_train = np.array(X, dtype=float)
         self.y_train = np.array(y)
         self.clases = np.unique(self.y_train)
 
-        # Cálculo de centroides (media) y desviaciones por clase
+        # 1. NORMALIZACIÓN GLOBAL PARA EL CLASIFICADOR
+        self.mean_global = np.mean(self.X_train, axis=0)
+        self.std_global = np.std(self.X_train, axis=0)
+        self.std_global = np.where(self.std_global < 1e-6, 1.0, self.std_global) # Evitar div 0
+        
+        # Escalar el X_train completo (solo necesario para KNN, pero útil en general)
+        self.X_train_scaled = (self.X_train - self.mean_global) / self.std_global
+
+        # 2. Cálculo de centroides sobre datos escalados (opcional, pero mejora)
         for c in self.clases:
-            X_c = self.X_train[self.y_train == c]
+            X_c = self.X_train_scaled[self.y_train == c]
             self.centroides[c] = np.mean(X_c, axis=0)
-            # Desviación con un epsilon pequeño para evitar divisiones por cero
             std_c = np.std(X_c, axis=0)
             self.desviaciones[c] = np.where(std_c < 1e-6, 1.0, std_c)
 
     def predecir_uno(self, vector):
-        """
-        Clasifica un vector individual (1D).
-        Devuelve (clase_predicha, dict_de_distancias_o_puntuaciones).
-        """
         vector = np.array(vector, dtype=float)
+        # 3. ESCALAR EL VECTOR ENTRANTE
+        vector_scaled = (vector - self.mean_global) / self.std_global
 
         if self.metodo == "centroides":
             distancias = {}
             for c in self.clases:
-                # Distancia euclídea normalizada (Mahalanobis diagonal)
-                diff = (vector - self.centroides[c]) / self.desviaciones[c]
+                diff = (vector_scaled - self.centroides[c]) / self.desviaciones[c]
                 dist = np.sqrt(np.sum(diff ** 2))
-                distancias[c] = float(dist)
-
-            # La clase con menor distancia euclídea gana
+                distancias[str(c)] = float(dist)
             clase_predicha = min(distancias, key=distancias.get)
             return clase_predicha, distancias
 
         elif self.metodo == "knn":
-            # Distancia euclídea simple a cada punto del conjunto de entrenamiento
-            dists = np.sqrt(np.sum((self.X_train - vector) ** 2, axis=1))
+            # Usar X_train_scaled y vector_scaled
+            dists = np.sqrt(np.sum((self.X_train_scaled - vector_scaled) ** 2, axis=1))
             k_indices = np.argsort(dists)[:self.k]
+            # ... el resto sigue igual
             k_labels = self.y_train[k_indices]
 
             # Votación por mayoría
             valores, conteos = np.unique(k_labels, return_counts=True)
-            clase_predicha = valores[np.argmax(conteos)]
+            clase_predicha = str(valores[np.argmax(conteos)])
             
-            resumen_votos = {c: int(np.sum(k_labels == c)) for c in self.clases}
-            return clase_predicha, resumen_votos
+            # Calculamos la distancia media a los k vecinos por cada clase
+            distancias = {}
+            for c in self.clases:
+                mask_c = (self.y_train == c)
+                dists_c = dists[mask_c]
+                distancias[str(c)] = float(np.min(dists_c)) if len(dists_c) > 0 else float('inf')
+
+            return clase_predicha, distancias
         else:
             raise ValueError(f"Método desconocido: {self.metodo}")
 
@@ -81,7 +90,10 @@ class ClasificadorVoz:
             "clases": self.clases,
             "centroides": self.centroides,
             "desviaciones": self.desviaciones,
+            "mean_global": self.mean_global,
+            "std_global": self.std_global,
             "X_train": self.X_train,
+            "X_train_scaled": self.X_train_scaled,
             "y_train": self.y_train
         }
         np.save(ruta_archivo, datos, allow_pickle=True)
@@ -93,7 +105,10 @@ class ClasificadorVoz:
         clasificador.clases = datos["clases"]
         clasificador.centroides = datos["centroides"]
         clasificador.desviaciones = datos["desviaciones"]
-        clasificador.X_train = datos["X_train"]
+        clasificador.mean_global = datos.get("mean_global", None)
+        clasificador.std_global = datos.get("std_global", None)
+        clasificador.X_train = datos.get("X_train", None)
+        clasificador.X_train_scaled = datos.get("X_train_scaled", None)
         clasificador.y_train = datos["y_train"]
         return clasificador
 

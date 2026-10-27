@@ -91,5 +91,5 @@ def reprocesar_dataset(top_db=20, n_ventanas=3, duracion_ventana=0.25):
     print(f"\nArchivos guardados en: {dir_salida}")
 
 if __name__ == "__main__":
-    reprocesar_dataset()
+    reprocesar_dataset(top_db=20)
 
