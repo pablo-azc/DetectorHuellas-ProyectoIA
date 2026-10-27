@@ -2,11 +2,22 @@ import os
 import sys
 import argparse
 import random
+import importlib.util
 from pathlib import Path
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
+
+# Cargar funciones originales de "3 - procesar_huellas.py"
+_dir_actual = os.path.dirname(os.path.abspath(__file__))
+_ruta_paso3 = os.path.join(_dir_actual, "3 - procesar_huellas.py")
+if os.path.exists(_ruta_paso3):
+    _spec3 = importlib.util.spec_from_file_location("procesar_huellas_paso3", _ruta_paso3)
+    _mod_paso3 = importlib.util.module_from_spec(_spec3)
+    _spec3.loader.exec_module(_mod_paso3)
+else:
+    _mod_paso3 = None
 
 # ==============================================================================
 # 1. ETAPAS DE PROCESAMIENTO (PASOS 2 A 4)
@@ -344,9 +355,18 @@ def procesar_e_identificar(ruta_imagen, distancia_max=4.0, simular=False, mostra
         img_gris, ang = simular_captura(img_gris)
         print(f"         Ángulo aplicado: {ang:.2f}°")
 
-    # Paso 3: Normalización
-    print("[Paso 3] Normalizando huella (orientación vertical, recorte, filtros)...")
-    img_norm = normalizar_huella_paso_3(img_gris, size=200)
+    # Paso 3: Normalización aplicando directamente "3 - procesar_huellas.py"
+    print("[Paso 3] Normalizando huella con '3 - procesar_huellas.py' (orientación, recorte y filtros)...")
+    if _mod_paso3 is not None:
+        img_norm = _mod_paso3.procesar(
+            img_gris,
+            size=200,
+            margen=0,
+            suavizado=1.2,
+            sharp_cantidad=1
+        )
+    else:
+        img_norm = normalizar_huella_paso_3(img_gris, size=200)
 
     # Paso 4: Extracción de matriz 8x8
     print("[Paso 4] Esqueletización y generación de matriz 8x8...")

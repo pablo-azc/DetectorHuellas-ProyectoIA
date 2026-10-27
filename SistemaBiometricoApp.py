@@ -22,7 +22,7 @@ class SistemaBiometricoApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Sistema Biométrico: Reconocimiento Huella + Voz")
-        self.root.geometry("980, 680")
+        self.root.geometry("980x680")
         self.root.minsize(880, 600)
         self.root.configure(bg="#1e1e24")
 
@@ -260,9 +260,9 @@ class SistemaBiometricoApp:
     def _hilo_proceso_audio(self):
         try:
             vector_audio = CapturaAudio.capturar_comando_voz(
-                duracion_total=3.0,
-                duracion_ruido=1.0,
-                countdown=3,
+                duracion_total=3,
+                duracion_ruido=1,
+                countdown=1,
                 grabar=True,
                 carpeta_grabar="Audios/EnVivoApp",
                 ruidoPostrior=True,
