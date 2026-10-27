@@ -22,7 +22,7 @@ Primero, se generó una base de huellas de 3 elementos, de forma que se pueda co
 Que generó las bases. Analizadas visualmente, se notan distintas.
 ### Generacion de variantes
 Luego, se toma la generación con detalles de imperfecciones, pero en otro archivo, para la base de datos
-`.\Anguli.exe -indir "VariantesPermitidas\Fingerprints" -impr -ni 20  -scratch '0 5' -noise '0 8' -trans 15 -rot 5 -outdir "VariantesPermitidas"`
+`.\Anguli.exe -indir "VariantesPermitidas\Fingerprints" -impr -ni 20  -scratch '0 5' -noise '0 8' -trans 15 -rot 10 -outdir "VariantesPermitidas"`
 Esto es, genera huellas digitales con: cortaduras, ruido, trasladadas (+-15 pixeles), y con ligeras deformaciones por rotación (+- 5°)
 ### Ordenamiento
 Este dataset es generado en carpetas del estilo ´Impresion_n/huella_i´. Se desea ´huella_i/impresion_n´, por lo que se hizo un pequeño script de Python para reordenarlas, con el siguiente prompt:

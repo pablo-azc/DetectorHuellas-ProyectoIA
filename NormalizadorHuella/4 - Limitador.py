@@ -148,7 +148,14 @@ if __name__ == '__main__':
     # Configura aquí tus directorios relativos o absolutos
     directorio_origen = r"C:\Users\Pablo\Documents\GitHub\DetectorHuellas-ProyectoIA\Huellas\VariantesPermitidas_Tomadas\huella_"
     directorio_destino = r"C:\Users\Pablo\Documents\GitHub\DetectorHuellas-ProyectoIA\Huellas\VariantesPermitidas_Preprocesadas\huella_"
+
+    try:
+        os.makedirs(directorio_destino+"1")
+        os.makedirs(directorio_destino+"2")
+        os.makedirs(directorio_destino+"3")
+    except:
+        pass
     
-    extraer_minucias_directorio(directorio_origen+"1", directorio_destino+"1",open(directorio_destino+"1/porcentajes.txt","w"))
-    extraer_minucias_directorio(directorio_origen+"2", directorio_destino+"2",open(directorio_destino+"2/porcentajes.txt","w"))
-    extraer_minucias_directorio(directorio_origen+"3", directorio_destino+"3",open(directorio_destino+"3/porcentajes.txt","w"))
+    extraer_minucias_directorio(directorio_origen+"1", directorio_destino+"1",open(directorio_destino+"1\\porcentajes.txt","w"))
+    extraer_minucias_directorio(directorio_origen+"2", directorio_destino+"2",open(directorio_destino+"2\\porcentajes.txt","w"))
+    extraer_minucias_directorio(directorio_origen+"3", directorio_destino+"3",open(directorio_destino+"3\\porcentajes.txt","w"))

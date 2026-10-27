@@ -7,7 +7,7 @@ import os
 import soundfile as sf
 from ProcesadorAudio import extraer_vector_ventanas
 
-def capturar_comando_voz(duracion_total=3.5, duracion_ruido=2, countdown=3, fs=16000, grabar=True, carpeta_grabar="Audios"):
+def capturar_comando_voz(duracion_total=3, duracion_ruido=2, countdown=3, fs=16000, grabar=True, carpeta_grabar="Audios",ruidoPostrior=True):
     """
     Captura audio del micrófono, reduce el ruido ambiental, recorta silencios 
     y devuelve un vector de características basado en 3 ventanas de 0.25s (MFCCs).
@@ -18,11 +18,12 @@ def capturar_comando_voz(duracion_total=3.5, duracion_ruido=2, countdown=3, fs=1
 
     print("\n--- Preparando micrófono ---")
     print("Preparese para algun comando ('Reconocer', 'Identificar' o 'Salir')...")
-    for i in range(countdown, countdown - duracion_ruido, -1):
-        time.sleep(1) 
+    for i in range(countdown, duracion_ruido, -1):
         print(f"{i}...")
+        time.sleep(1) 
+        
 
-    print(f"{countdown - duracion_ruido}...")
+    print(f"{duracion_ruido}...")
     # Capturando perfil de ruido ambiental
     ruido = sd.rec(int(duracion_ruido * fs), samplerate=fs, channels=1, dtype='float32')
     sd.wait()
@@ -31,6 +32,11 @@ def capturar_comando_voz(duracion_total=3.5, duracion_ruido=2, countdown=3, fs=1
     print("🔴 GRABANDO: ('Reconocer', 'Identificar' o 'Salir')...")
     grabacion = sd.rec(int(duracion_total * fs), samplerate=fs, channels=1, dtype='float32')
     sd.wait()
+    if ruidoPostrior:
+        # Capturando perfil de ruido ambiental
+        ruido2 = sd.rec(int(duracion_ruido * fs), samplerate=fs, channels=1, dtype='float32')
+        sd.wait()
+        ruido=ruido+ruido2
     print("✅ Grabación finalizada.")
 
     # 2. Sustracción Espectral de Ruido
@@ -75,8 +81,8 @@ if __name__ == "__main__":
             print("\nExtracción exitosa.")
             print(f"Dimensión del vector para K-NN: {vector.shape}")
             #print("vector entero", vector)
-            datosCompleto.write(f"{np.round(vector, 3)}\n")
-            datosResumen.write(f"{np.round(vector[:5], 3)}\n")
+            #datosCompleto.write(f"{np.round(vector, 3)}\n")
+            #datosResumen.write(f"{np.round(vector[:5], 3)}\n")
             #print("Primeros 5 valores del vector:", np.round(vector[:5], 3))
         else:
             print("\nExtracción Fallida. probá hablar mas fuerte")
