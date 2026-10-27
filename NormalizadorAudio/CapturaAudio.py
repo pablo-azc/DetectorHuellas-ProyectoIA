@@ -7,37 +7,66 @@ import os
 import soundfile as sf
 from ProcesadorAudio import extraer_vector_ventanas
 
-def capturar_comando_voz(duracion_total=3, duracion_ruido=1, countdown=3, fs=16000, grabar=True, carpeta_grabar="Audios",ruidoPostrior=True):
+def capturar_comando_voz(duracion_total=3, duracion_ruido=1, countdown=3, fs=16000, 
+                          grabar=True, carpeta_grabar="Audios", ruidoPostrior=True,
+                          modo_debug=False, callback_estado=None):
     """
     Captura audio del micrófono, reduce el ruido ambiental, recorta silencios 
     y devuelve un vector de características basado en 3 ventanas de 0.25s (MFCCs).
+    
+    :param modo_debug: Si True, imprime mensajes concisos tipo '[DEBUG] ...'.
+    :param callback_estado: Función opcional callback(estado_str) para notificar a una UI gráfica.
     """
+    def notificar(msg_consola, estado_ui=None):
+        if callback_estado and estado_ui:
+            callback_estado(estado_ui)
+        if msg_consola:
+            print(msg_consola)
 
     if grabar:
         os.makedirs(carpeta_grabar, exist_ok=True)
 
-    print("\n--- Preparando micrófono ---")
-    print("Preparese para algun comando ('Reconocer', 'Identificar' o 'Salir')...")
-    for i in range(countdown, duracion_ruido, -1):
-        print(f"{i}...")
-        time.sleep(1) 
-        
+    if modo_debug:
+        notificar("[DEBUG] Preparando captura...", "¡Prepárate!")
+    else:
+        notificar("\n--- Preparando micrófono ---\nPreparese para algun comando ('Reconocer', 'Identificar' o 'Salir')...", "¡Prepárate!")
 
-    print(f"{duracion_ruido}...")
+    for i in range(countdown, duracion_ruido, -1):
+        if modo_debug:
+            notificar(f"[DEBUG] Cuenta regresiva: {i}", f"¡Prepárate! ({i}...)")
+        else:
+            notificar(f"{i}...", f"¡Prepárate! ({i}...)")
+        time.sleep(1)
+
+    if modo_debug:
+        notificar("[DEBUG] Grabando Silencio (Perfil de Ruido)...", f"¡Prepárate! ({duracion_ruido}...)")
+    else:
+        notificar(f"{duracion_ruido}...", f"¡Prepárate! ({duracion_ruido}...)")
+
     # Capturando perfil de ruido ambiental
     ruido = sd.rec(int(duracion_ruido * fs), samplerate=fs, channels=1, dtype='float32')
     sd.wait()
     
     # 1. Captura de Audio
-    print("🔴 GRABANDO: ('Reconocer', 'Identificar' o 'Salir')...")
+    if modo_debug:
+        notificar("[DEBUG] Grabando Audio (Comando de voz)...", "🔴 GRABANDO COMANDO...")
+    else:
+        notificar("🔴 GRABANDO: ('Reconocer', 'Identificar' o 'Salir')...", "🔴 GRABANDO COMANDO...")
+
     grabacion = sd.rec(int(duracion_total * fs), samplerate=fs, channels=1, dtype='float32')
     sd.wait()
+
     if ruidoPostrior:
-        # Capturando perfil de ruido ambiental
+        if modo_debug:
+            notificar("[DEBUG] Grabando Silencio posterior...", "Analizando audio...")
         ruido2 = sd.rec(int(duracion_ruido * fs), samplerate=fs, channels=1, dtype='float32')
         sd.wait()
-        ruido=ruido+ruido2
-    print("✅ Grabación finalizada.")
+        ruido = ruido + ruido2
+
+    if modo_debug:
+        notificar("[DEBUG] Grabación finalizada. Procesando...", "Procesando audio...")
+    else:
+        notificar("✅ Grabación finalizada.", "Procesando audio...")
 
     # 2. Sustracción Espectral de Ruido
     audio_limpio = nr.reduce_noise(y=grabacion.flatten(), sr=fs, y_noise=ruido.flatten())

@@ -319,7 +319,7 @@ def graficar_identificacion(modelo, vector_externo, matriz_8x8, img_norm,
 
     plt.show()
 
-def procesar_e_identificar(ruta_imagen, distancia_max=4.0, simular=False):
+def procesar_e_identificar(ruta_imagen, distancia_max=4.0, simular=False, mostrar_grafico=True):
     """
     Función principal que ejecuta los pasos 2 a 4 sobre una imagen externa
     y la compara contra los centroides guardados de K-Means.
@@ -379,9 +379,10 @@ def procesar_e_identificar(ruta_imagen, distancia_max=4.0, simular=False):
         print(f"  DISTANCIA  : {distancia_min:.3f} (SUPERA el umbral {distancia_max})")
     print("-----------------------------------------------------------------\n")
 
-    print("Desplegando gráfico de visualización...")
-    graficar_identificacion(modelo, vector_64, matriz_8x8, img_norm,
-                           cluster_cercano, distancia_min, distancia_max, veredicto, nombre_clase)
+    if mostrar_grafico:
+        print("Desplegando gráfico de visualización...")
+        graficar_identificacion(modelo, vector_64, matriz_8x8, img_norm,
+                               cluster_cercano, distancia_min, distancia_max, veredicto, nombre_clase)
 
     return {
         'veredicto': veredicto,
@@ -389,7 +390,9 @@ def procesar_e_identificar(ruta_imagen, distancia_max=4.0, simular=False):
         'cluster_cercano': cluster_cercano,
         'distancia_min': distancia_min,
         'vector_64': vector_64,
-        'matriz_8x8': matriz_8x8
+        'matriz_8x8': matriz_8x8,
+        'img_norm': img_norm,
+        'modelo': modelo
     }
 
 # ==============================================================================
