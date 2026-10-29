@@ -101,8 +101,8 @@ def capturar_comando_voz(duracion_total=3, duracion_ruido=1, countdown=3, fs=160
 if __name__ == "__main__":
     temp=input()
     c=0
-    datosCompleto=open("datosCompletos.txt","w")
-    datosResumen=open("datosResumen.txt","w")
+    #datosCompleto=open("datosCompletos.txt","w")
+    #datosResumen=open("datosResumen.txt","w")
     while (temp != "salir"):
         c+=1
         vector = capturar_comando_voz(carpeta_grabar=f"Audios/Audio{c}")

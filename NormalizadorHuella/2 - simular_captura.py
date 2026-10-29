@@ -22,6 +22,27 @@ def simular_captura_real(
     img = cv2.imread(str(ruta_img))
     h, w = img.shape[:2]
 
+    # 6. Recortar aleatoriamente hasta un 10% de la imagen por un borde aleatorio
+    h, w = img.shape[:2]
+
+    # Elegir un borde al azar (top, bottom, left, right)
+    borde = random.choice(['top', 'bottom', 'left', 'right'])
+    # Recortar entre el 1% y el 10% de la dimensión correspondiente
+    if borde in ('top', 'bottom'):
+        max_corte = int(h * 0.15)
+        corte = random.randint(1, max(1, max_corte))
+        if borde == 'top':
+            img = img[corte:, :]
+        else:
+            img = img[:h - corte, :]
+    else:
+        max_corte = int(w * 0.15)
+        corte = random.randint(1, max(1, max_corte))
+        if borde == 'left':
+            img = img[:, corte:]
+        else:
+            img = img[:, :w - corte]
+
     # 2. Calcular y añadir el borde blanco (Padding)
     pad_h = int(h * pad_porcentaje)
     pad_w = int(w * pad_porcentaje)
@@ -53,10 +74,12 @@ def simular_captura_real(
         borderValue=(255, 255, 255)
     )
 
-    # 6. Guardar la imagen transformada
+
+
+    # 7. Guardar la imagen transformada
     Path(ruta_salida).parent.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(ruta_salida), img_rotada)
-    print(f"Procesada: {ruta_salida} | Ángulo aplicado: {angulo:.2f}°")
+    print(f"Procesada: {ruta_salida} | Ángulo: {angulo:.2f}° | Recorte: {corte}px en '{borde}'")
 
 
 def procesar_dataset_completo(directorio_origen: str, directorio_destino: str):
@@ -81,7 +104,7 @@ def procesar_dataset_completo(directorio_origen: str, directorio_destino: str):
         simular_captura_real(
             ruta_imagen=str(archivo),
             ruta_salida=str(salida),
-            angulo_max=90.0,
+            angulo_max=50.0,
             pad_porcentaje=0.35
         )
 

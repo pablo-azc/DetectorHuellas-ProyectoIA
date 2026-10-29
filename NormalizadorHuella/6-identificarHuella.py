@@ -25,9 +25,29 @@ else:
 
 def simular_captura(img, angulo_max=45.0, pad_porcentaje=0.35):
     """
-    Paso 2: Añade borde blanco y aplica una rotación aleatoria
-    simulando la captura en un escáner.
+    Paso 2: Recorta aleatoriamente hasta un 15% de un borde, añade borde blanco
+    y aplica una rotación aleatoria, simulando la captura en un escáner real.
     """
+    h, w = img.shape[:2]
+
+    # Recortar aleatoriamente un borde (entre 1 px y 15% de la dimensión)
+    borde = random.choice(['top', 'bottom', 'left', 'right'])
+    if borde in ('top', 'bottom'):
+        max_corte = int(h * 0.15)
+        corte = random.randint(1, max(1, max_corte))
+        if borde == 'top':
+            img = img[corte:, :]
+        else:
+            img = img[:h - corte, :]
+    else:
+        max_corte = int(w * 0.15)
+        corte = random.randint(1, max(1, max_corte))
+        if borde == 'left':
+            img = img[:, corte:]
+        else:
+            img = img[:, :w - corte]
+
+    # Padding blanco y rotación aleatoria
     h, w = img.shape[:2]
     pad_h = int(h * pad_porcentaje)
     pad_w = int(w * pad_porcentaje)
@@ -351,7 +371,7 @@ def procesar_e_identificar(ruta_imagen, distancia_max=4.0, simular=False, mostra
 
     # Paso 2 opcional: Simular captura
     if simular:
-        print("[Paso 2] Aplicando simulación de captura con rotación aleatoria...")
+        print("[Paso 2] Aplicando simulación de captura (recorte de borde + rotación)...")
         img_gris, ang = simular_captura(img_gris)
         print(f"         Ángulo aplicado: {ang:.2f}°")
 
@@ -401,7 +421,7 @@ def procesar_e_identificar(ruta_imagen, distancia_max=4.0, simular=False, mostra
 
     if mostrar_grafico:
         print("Desplegando gráfico de visualización...")
-        graficar_identificacion(modelo, vector_64, matriz_8x8, img_norm,
+        graficar_identificacion(modelo, vector_64, matriz_8x8, img_gris,
                                cluster_cercano, distancia_min, distancia_max, veredicto, nombre_clase)
 
     return {
@@ -434,7 +454,7 @@ def main():
     if not args.img:
         dir_base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         ruta_defecto = os.path.join(
-            dir_base, "Huellas", "VariantesPermitidas_Tomadas", "huella_1", "0_1.png"
+            dir_base, "Huellas", "VariantesPermitidas_Ordenada/Complejas", "huella_1", "0_1.png"
         )
         if os.path.exists(ruta_defecto):
             print(f"No se especificó --img. Usando imagen de prueba por defecto:\n  {ruta_defecto}\n")

@@ -113,7 +113,7 @@ class ClasificadorVoz:
         return clasificador
 
 
-def evaluar_clasificador():
+def evaluar_clasificador(K_vecinos=3,guardar=True):
     dir_dataset = os.path.join(os.path.dirname(__file__), "DatasetVectores")
     X = np.load(os.path.join(dir_dataset, "X.npy"))
     y = np.load(os.path.join(dir_dataset, "y.npy"))
@@ -130,8 +130,8 @@ def evaluar_clasificador():
     print(f" Total de muestras: {len(X)}")
     print("=====================================================\n")
 
-    for metodo in ["centroides", "knn"]:
-        clf = ClasificadorVoz(metodo=metodo, k=3)
+    for metodo in ["knn"]:
+        clf = ClasificadorVoz(metodo=metodo, k=K_vecinos)
         aciertos = 0
         total = len(X)
         errores = []
@@ -161,12 +161,19 @@ def evaluar_clasificador():
         print()
 
     # Entrenar modelo final con todos los datos y guardarlo
-    modelo_final = ClasificadorVoz(metodo="knn")
+    modelo_final = ClasificadorVoz(metodo="knn",k=K_vecinos)
     modelo_final.entrenar(X, y)
-    ruta_guardado = os.path.join(dir_dataset, "modelo_voz.npy")
-    modelo_final.guardar_modelo(ruta_guardado)
-    print(f"Modelo final guardado en: {ruta_guardado}")
+    if guardar:
+        ruta_guardado = os.path.join(dir_dataset, "modelo_voz.npy")
+        modelo_final.guardar_modelo(ruta_guardado)
+        print(f"Modelo final guardado en: {ruta_guardado}")
+    return exactitud
 
 if __name__ == "__main__":
-    evaluar_clasificador()
+    grafico=open("plotKnn.csv","w")
+    for i in range(1,30):
+        grafico.write(f"{i};\t{evaluar_clasificador(K_vecinos=i,guardar=False)}\n")
+    grafico.close()
+    evaluar_clasificador(K_vecinos=1)
+
 
