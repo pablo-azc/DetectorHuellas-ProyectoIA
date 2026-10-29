@@ -59,13 +59,22 @@ def graficar_pca(vector_nuevo=None, etiqueta_predicha=None):
     X = X[mascara]
     y = y[mascara]
 
-    # Ajustar PCA con el dataset (centrado respecto a la media global)
+    # Estandarizar (media 0, desvío 1 por feature) antes del PCA, igual que el clasificador.
+    # Sin esto, las features de mayor magnitud/varianza dominan los componentes principales.
     media_global = np.mean(X, axis=0)
-    X_centrado = X - media_global
-    _, _, Vt = np.linalg.svd(X_centrado, full_matrices=False)
-    W = Vt[:3].T  # Matriz de proyección a 3D (39 x 3)
+    std_global = np.std(X, axis=0)
+    std_global = np.where(std_global < 1e-6, 1.0, std_global)  # Evitar división por 0
 
-    X_pca = np.dot(X_centrado, W)
+    X_escalado = (X - media_global) / std_global
+    _, S, Vt = np.linalg.svd(X_escalado, full_matrices=False)
+    W = Vt[:3].T  # Matriz de proyección a 3D (n_features x 3)
+
+    # Varianza explicada por cada componente
+    var_explicada = (S ** 2) / np.sum(S ** 2)
+    print(f"Varianza explicada PC1-PC3: {np.round(var_explicada[:3] * 100, 1)} % "
+          f"(total {var_explicada[:3].sum() * 100:.1f} %)")
+
+    X_pca = np.dot(X_escalado, W)
 
     colores = {
         "reconocer": "#1f77b4",    # Azul
@@ -87,7 +96,7 @@ def graficar_pca(vector_nuevo=None, etiqueta_predicha=None):
 
         # Graficar centroide proyectado
         centroide_clase = np.mean(X[y == clase], axis=0)
-        centroide_pca = np.dot(centroide_clase - media_global, W)
+        centroide_pca = np.dot((centroide_clase - media_global) / std_global, W)
         ax.scatter(
             centroide_pca[0], centroide_pca[1], centroide_pca[2],
             c=color, marker='X', s=180, edgecolors='black',
@@ -96,8 +105,8 @@ def graficar_pca(vector_nuevo=None, etiqueta_predicha=None):
 
     # Si se pasó un vector nuevo, proyectarlo y destacarlo
     if vector_nuevo is not None:
-        nuevo_centrado = vector_nuevo - media_global
-        nuevo_pca = np.dot(nuevo_centrado, W)
+        nuevo_escalado = (np.asarray(vector_nuevo, dtype=float) - media_global) / std_global
+        nuevo_pca = np.dot(nuevo_escalado, W)
 
         color_punto = colores.get(etiqueta_predicha, "#d62728")
         marcador = '*' if etiqueta_predicha != "NO_RECONOCIDO" else 'P'
@@ -115,9 +124,9 @@ def graficar_pca(vector_nuevo=None, etiqueta_predicha=None):
         )
 
     ax.set_title("Mapa PCA 3D de Comandos de Voz", fontsize=14, fontweight='bold', pad=15)
-    ax.set_xlabel("PC 1", fontsize=11, labelpad=10)
-    ax.set_ylabel("PC 2", fontsize=11, labelpad=10)
-    ax.set_zlabel("PC 3", fontsize=11, labelpad=10)
+    ax.set_xlabel(f"PC 1 ({var_explicada[0] * 100:.1f}%)", fontsize=11, labelpad=10)
+    ax.set_ylabel(f"PC 2 ({var_explicada[1] * 100:.1f}%)", fontsize=11, labelpad=10)
+    ax.set_zlabel(f"PC 3 ({var_explicada[2] * 100:.1f}%)", fontsize=11, labelpad=10)
     ax.grid(True, linestyle="--", alpha=0.4)
     ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', frameon=True)
     plt.tight_layout()

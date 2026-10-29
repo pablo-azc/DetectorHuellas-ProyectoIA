@@ -1,6 +1,8 @@
 import os
 import sys
 import threading
+import subprocess
+import glob
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import numpy as np
@@ -16,7 +18,21 @@ sys.path.append(os.path.join(directorio_raiz, "NormalizadorHuella"))
 import CapturaAudio
 from evaluarNuevoAudio import clasificar_vector
 import importlib
+import importlib.util
 identificar_huella_modulo = importlib.import_module("NormalizadorHuella.6-identificarHuella")
+
+# El archivo "2 - simular_captura.py" tiene espacios en el nombre → cargarlo por ruta
+_sc_path = os.path.join(directorio_raiz, "NormalizadorHuella", "2 - simular_captura.py")
+_sc_spec = importlib.util.spec_from_file_location("simular_captura", _sc_path)
+simular_captura_modulo = importlib.util.module_from_spec(_sc_spec)
+_sc_spec.loader.exec_module(simular_captura_modulo)
+
+# Rutas de Anguli
+ANGULI_DIR         = r"C:\Users\Pablo\Documents\Proyecto IA\Anguli-MinGW"
+ANGULI_EXE         = os.path.join(ANGULI_DIR, "Anguli.exe")
+ANGULI_OUTDIR_PERM = "VariantesTemporales"      # 3 huellas fijas (permitidas)
+ANGULI_OUTDIR_RAND = "VariantesTemporalesNoP"   # 1 huella aleatoria (no permitida)
+ANGULI_SEED_PERM   = "763982"                   # semilla fija para las 3 identidades
 
 class SistemaBiometricoApp:
     def __init__(self, root):
@@ -83,7 +99,37 @@ class SistemaBiometricoApp:
             bg="#3a86ff", fg="white", activebackground="#2a75e6", activeforeground="white",
             relief="flat", padx=15, pady=6, cursor="hand2", command=self.cargar_huella
         )
-        btn_cargar.pack(fill="x", padx=15, pady=8)
+        btn_cargar.pack(fill="x", padx=15, pady=(8, 2))
+
+        # --- Sección Anguli: título + 4 botones ---
+        lbl_anguli_sep = tk.Label(
+            card_huella, text="─── Generar con Anguli ───",
+            bg="#2b2d42", fg="#c77dff", font=("Segoe UI", 8, "bold")
+        )
+        lbl_anguli_sep.pack(fill="x", padx=15, pady=(2, 0))
+
+        frame_anguli_btns = tk.Frame(card_huella, bg="#2b2d42")
+        frame_anguli_btns.pack(fill="x", padx=15, pady=(4, 10))
+
+        # Los primeros 3 son huellas permitidas (fp_1, fp_2, fp_3); el 4to es aleatoria (None)
+        BTN_DEFS = [
+            ("🧬 Huella 1", "#1b4332", "#145a32", 1),
+            ("🧬 Huella 2", "#1b4332", "#145a32", 2),
+            ("🧬 Huella 3", "#1b4332", "#145a32", 3),
+            ("🎲 Aleatoria", "#7d3c00", "#9c4900", None),
+        ]
+
+        self._btns_anguli = []
+        for texto, bg, abg, fp_idx in BTN_DEFS:
+            btn = tk.Button(
+                frame_anguli_btns,
+                text=texto, font=("Segoe UI", 9, "bold"),
+                bg=bg, fg="white", activebackground=abg, activeforeground="white",
+                relief="flat", pady=5, cursor="hand2",
+                command=lambda idx=fp_idx: self.generar_huella_anguli(idx)
+            )
+            btn.pack(side="left", fill="x", expand=True, padx=2)
+            self._btns_anguli.append(btn)
 
         # Visualizadores de imagen (Original y Normalizada)
         frame_imagenes = tk.Frame(card_huella, bg="#2b2d42")
@@ -174,6 +220,154 @@ class SistemaBiometricoApp:
         )
         self.lbl_res_mensaje.pack(anchor="w", padx=20, pady=(2, 10))
 
+    def generar_huella_anguli(self, fp_idx):
+        """
+        Genera una huella con Anguli y la carga automáticamente.
+        fp_idx = 1, 2 o 3  →  huella permitida (fp_X/1.jpg, seed fija)
+        fp_idx = None       →  huella aleatoria (seed random, carpeta NoP)
+        """
+        self._set_btns_anguli(False)
+        modo = f"Huella {fp_idx}" if fp_idx else "Aleatoria"
+        self.lbl_info_huella.config(text=f"⏳ Ejecutando Anguli ({modo}), espere...")
+        self.root.update_idletasks()
+        hilo = threading.Thread(
+            target=self._hilo_generar_anguli, args=(fp_idx,), daemon=True
+        )
+        hilo.start()
+
+    def _set_btns_anguli(self, habilitado: bool):
+        """Habilita o deshabilita todos los botones de Anguli."""
+        state = "normal" if habilitado else "disabled"
+        for btn in self._btns_anguli:
+            btn.config(state=state)
+
+    def _hilo_generar_anguli(self, fp_idx):
+        import random as _random
+        try:
+            if fp_idx is not None:
+                # ── Huella permitida: 3 identidades, seed fija, tomar fp_{fp_idx}/1.jpg ──
+                outdir_rel = ANGULI_OUTDIR_PERM
+                outdir_abs = os.path.join(ANGULI_DIR, outdir_rel)
+                cmd = [
+                    ANGULI_EXE,
+                    "-num", "3",
+                    "-ni",  "1",
+                    "-outdir", outdir_rel,
+                    "-trans", "20",
+                    "-rot",   "15",
+                    "-seed",  ANGULI_SEED_PERM,
+                ]
+                fp_carpeta = f"fp_{fp_idx}"
+                patron = os.path.join(outdir_abs, "Impression_1", "fp_1", f"{fp_idx}.jpg")
+            else:
+                # ── Huella aleatoria: 1 identidad, seed random, tomar fp_1/1.jpg ──
+                outdir_rel = ANGULI_OUTDIR_RAND
+                outdir_abs = os.path.join(ANGULI_DIR, outdir_rel)
+                semilla = str(_random.randint(100000, 999999))
+                cmd = [
+                    ANGULI_EXE,
+                    "-num", "1",
+                    "-ni",  "1",
+                    "-outdir", outdir_rel,
+                    "-trans", "20",
+                    "-rot",   "15",
+                    "-seed",  semilla,
+                ]
+                fp_carpeta = "fp_1"
+                patron = os.path.join(outdir_abs, "Impression_1", fp_carpeta, "*.jpg")
+
+            resultado = subprocess.run(
+                cmd, cwd=ANGULI_DIR,
+                capture_output=True, text=True, timeout=60,
+            )
+
+            if resultado.returncode != 0:
+                stderr = resultado.stderr.strip() or resultado.stdout.strip()
+                self.root.after(0, lambda: messagebox.showerror(
+                    "Error de Anguli", f"Anguli terminó con error:\n{stderr}"
+                ))
+                self.root.after(0, lambda: self._set_btns_anguli(True))
+                return
+
+            archivos = sorted(glob.glob(patron))
+            if not archivos:
+                carpeta_mostrar = os.path.join(outdir_abs, "Impression_1", fp_carpeta)
+                self.root.after(0, lambda: messagebox.showerror(
+                    "Error de Anguli",
+                    f"No se encontró ningún .jpg en:\n{carpeta_mostrar}"
+                ))
+                self.root.after(0, lambda: self._set_btns_anguli(True))
+                return
+
+            ruta_original = archivos[0]   # siempre 1.jpg (único archivo por carpeta)
+
+            # Pasar por simular_captura
+            ruta_simulada = os.path.join(outdir_abs, "huella_simulada.jpg")
+            simular_captura_modulo.simular_captura_real(
+                ruta_imagen=ruta_original,
+                ruta_salida=ruta_simulada,
+            )
+
+            self.root.after(0, lambda: self._cargar_desde_ruta(ruta_simulada))
+
+        except FileNotFoundError:
+            self.root.after(0, lambda: messagebox.showerror(
+                "Anguli no encontrado",
+                f"No se encontró Anguli.exe en:\n{ANGULI_EXE}\n\n"
+                "Verificá que la ruta ANGULI_EXE en el código sea correcta."
+            ))
+            self.root.after(0, lambda: self._set_btns_anguli(True))
+        except subprocess.TimeoutExpired:
+            self.root.after(0, lambda: messagebox.showerror(
+                "Tiempo agotado", "Anguli tardó demasiado en responder (>60s)."
+            ))
+            self.root.after(0, lambda: self._set_btns_anguli(True))
+        except Exception as e:
+            self.root.after(0, lambda: messagebox.showerror(
+                "Error inesperado", f"Ocurrió un error al generar la huella:\n{e}"
+            ))
+            self.root.after(0, lambda: self._set_btns_anguli(True))
+
+    def _cargar_desde_ruta(self, ruta: str):
+        """Carga y procesa una huella a partir de una ruta ya conocida (sin diálogo)."""
+        self._set_btns_anguli(True)
+        self.ruta_huella = ruta
+        nombre_archivo = os.path.basename(ruta)
+        self.lbl_info_huella.config(text=f"Archivo: {nombre_archivo} | Procesando...")
+        self.root.update_idletasks()
+
+        try:
+            res = identificar_huella_modulo.procesar_e_identificar(
+                ruta, distancia_max=4.0, mostrar_grafico=False, simular=True
+            )
+            self.resultado_huella = res
+
+            img_cv = cv2.imread(ruta)
+            if img_cv is not None:
+                img_cv = cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB)
+                img_pil = Image.fromarray(img_cv)
+                img_pil.thumbnail((160, 160))
+                self.tk_img_orig = ImageTk.PhotoImage(img_pil)
+                self.lbl_canvas_orig.config(image=self.tk_img_orig, text="")
+
+            if 'img_norm' in res:
+                norm_pil = Image.fromarray(res['img_norm'])
+                norm_pil.thumbnail((160, 160))
+                self.tk_img_norm = ImageTk.PhotoImage(norm_pil)
+                self.lbl_canvas_norm.config(image=self.tk_img_norm, text="")
+
+            self.lbl_info_huella.config(
+                text=f"Huella generada con Anguli: {nombre_archivo} lista."
+            )
+            self.lbl_res_mensaje.config(
+                text="Huella cargada. Presione [ENTER] o 'Iniciar Grabación' para dar la orden.",
+                fg="#edf2f4"
+            )
+
+        except Exception as e:
+            messagebox.showerror("Error de Huella", f"No se pudo procesar la huella generada:\n{e}")
+            self.lbl_info_huella.config(text="Error al procesar la huella generada.")
+
     def cargar_huella(self):
         ruta = filedialog.askopenfilename(
             title="Seleccionar imagen de huella dactilar",
@@ -189,7 +383,7 @@ class SistemaBiometricoApp:
 
         try:
             # Procesar la huella usando el módulo de identificación (sin mostrar popup)
-            res = identificar_huella_modulo.procesar_e_identificar(ruta, distancia_max=4.0, mostrar_grafico=False)
+            res = identificar_huella_modulo.procesar_e_identificar(ruta, distancia_max=4.0, mostrar_grafico=False,simular=True)
             self.resultado_huella = res
 
             # Mostrar huella original en thumbnail
