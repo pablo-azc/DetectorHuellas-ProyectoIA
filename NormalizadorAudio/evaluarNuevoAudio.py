@@ -164,4 +164,4 @@ def evaluar_en_vivo(umbral_max=UMBRAL_DISTANCIA_MAX, duracion_ruido=1, mostrar_g
 
 if __name__ == "__main__":
     while(input()!="salir"):
-        evaluar_en_vivo(mostrar_grafico=False)
+        evaluar_en_vivo(mostrar_grafico=True)

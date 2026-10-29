@@ -38,3 +38,7 @@ Basado en el proceso anterior, se recorta la imagen y se rota. Para lograr eso, 
 La siguiente etapa para la normalizacion es aplicar un efecto de Blur para disolver el ruido "sal y pimienta", 
 ### Binariacion
 Se consideró directamente hacer que la imagen se convierta de forma que solo queden los bordes "filosos", donde solo cuando se supere un umbral se considere "negro"
+
+## Como se ve
+### Nodulos
+para el analisis de datos que se realiza en este proyeto, los datos se transfieren a una matriz de forma, de forma de que acepten los vectores con las formas /, \ y - 

@@ -1,0 +1,1 @@
+Posteriormente, para unificar, se creo una GUI tal que permita cargar una imagen (preferiblemente las que anteriormente sufrieron una de las mejoras para que no sean tan sencillas de reconocer a primera instancia)
