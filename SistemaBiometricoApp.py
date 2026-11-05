@@ -15,8 +15,8 @@ sys.path.append(directorio_raiz)
 sys.path.append(os.path.join(directorio_raiz, "NormalizadorAudio"))
 sys.path.append(os.path.join(directorio_raiz, "NormalizadorHuella"))
 
-import CapturaAudio
-from evaluarNuevoAudio import clasificar_vector
+import A1_CapturaAudio
+from A6_evaluarNuevoAudio import clasificar_vector
 import importlib
 import importlib.util
 identificar_huella_modulo = importlib.import_module("NormalizadorHuella.6-identificarHuella")
@@ -263,7 +263,7 @@ class SistemaBiometricoApp:
                 # ── Huella aleatoria: 1 identidad, seed random, tomar fp_1/1.jpg ──
                 outdir_rel = ANGULI_OUTDIR_RAND
                 outdir_abs = os.path.join(ANGULI_DIR, outdir_rel)
-                semilla = str(_random.randint(100000, 999999))
+                semilla = str(_random.randint(000000, 999999))
                 cmd = [
                     ANGULI_EXE,
                     "-num", "1",
@@ -453,7 +453,7 @@ class SistemaBiometricoApp:
 
     def _hilo_proceso_audio(self):
         try:
-            vector_audio = CapturaAudio.capturar_comando_voz(
+            vector_audio = A1_CapturaAudio.capturar_comando_voz(
                 duracion_total=3,
                 duracion_ruido=1,
                 countdown=1,

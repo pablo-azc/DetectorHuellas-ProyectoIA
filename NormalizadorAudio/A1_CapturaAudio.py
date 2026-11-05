@@ -5,7 +5,7 @@ import noisereduce as nr
 import time
 import os
 import soundfile as sf
-from ProcesadorAudio import extraer_vector_ventanas
+from A3_ProcesadorAudio import extraer_vector_ventanas
 
 def capturar_comando_voz(duracion_total=3, duracion_ruido=1, countdown=3, fs=16000, 
                           grabar=True, carpeta_grabar="Audios", ruidoPostrior=True,

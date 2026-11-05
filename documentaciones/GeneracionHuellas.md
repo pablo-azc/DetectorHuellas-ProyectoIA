@@ -42,3 +42,9 @@ Se consideró directamente hacer que la imagen se convierta de forma que solo qu
 ## Como se ve
 ### Nodulos
 para el analisis de datos que se realiza en este proyeto, los datos se transfieren a una matriz de forma, de forma de que acepten los vectores con las formas /, \ y - 
+
+
+#### NOTA:HACER UN GRAFICO DE ACEPTACION DE LAS HUELLAS
+Como seria: en un eje poner la distancia que uso para el umbral , y poner en puntitos las aceptadas y las No aceptadas (grafico lineal, uno por huella). Probar: Verde la huella, rojo intrusos, y Azul las otras si aceptadas
+
+#### Nota: hacer la matriz de confusion con intrusos

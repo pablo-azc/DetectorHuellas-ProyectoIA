@@ -5,7 +5,6 @@ class ClasificadorVoz:
     """
     Clasificador auto-desarrollado para comandos de voz.
     Implementa dos métodos nativos en NumPy:
-    1. Distancia Euclidiana Estandarizada a Centroides (por defecto).
     2. K-Nearest Neighbors (KNN) nativo.
     """
     def __init__(self, metodo="centroides", k=3):
@@ -171,9 +170,17 @@ def evaluar_clasificador(K_vecinos=3,guardar=True):
 
 if __name__ == "__main__":
     grafico=open("plotKnn.csv","w")
+    best=0
+    k_best=1
     for i in range(1,30):
-        grafico.write(f"{i};\t{evaluar_clasificador(K_vecinos=i,guardar=False)}\n")
+        analizado=evaluar_clasificador(K_vecinos=i,guardar=False)
+        grafico.write(f"{i};\t{analizado}\n")
+        if analizado > best:
+            best=analizado
+            k_best=i
     grafico.close()
-    evaluar_clasificador(K_vecinos=1)
+    evaluar_clasificador(K_vecinos=k_best)
+    print(f"Mejor K: {k_best}, con presicion {best}")
+
 
 

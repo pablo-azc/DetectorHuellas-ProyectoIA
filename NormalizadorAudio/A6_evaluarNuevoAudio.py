@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 # Asegurar path local
 sys.path.append(os.path.dirname(__file__))
 
-import CapturaAudio
-from ClasificadorVoz import ClasificadorVoz
+import A1_CapturaAudio
+from A5_ClasificadorVoz import ClasificadorVoz
 
 dir_dataset = os.path.join(os.path.dirname(__file__), "DatasetVectores")
 ruta_modelo = os.path.join(dir_dataset, "modelo_voz.npy")
@@ -138,7 +138,7 @@ def evaluar_en_vivo(umbral_max=UMBRAL_DISTANCIA_MAX, duracion_ruido=1, mostrar_g
     Si mostrar_grafico es True, abre la proyección PCA 3D del nuevo audio.
     """
     print("Iniciando captura de audio...")
-    vector = CapturaAudio.capturar_comando_voz(
+    vector = A1_CapturaAudio.capturar_comando_voz(
         grabar=True, 
         carpeta_grabar="Audios/EnVivo", 
         duracion_ruido=duracion_ruido

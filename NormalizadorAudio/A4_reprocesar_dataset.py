@@ -1,7 +1,7 @@
 import os
 import soundfile as sf
 import numpy as np
-from ProcesadorAudio import extraer_vector_ventanas
+from A3_ProcesadorAudio import extraer_vector_ventanas
 
 dir_origen = os.path.join(os.path.dirname(__file__), "AudiosPersonas")
 dir_salida = os.path.join(os.path.dirname(__file__), "DatasetVectores")
