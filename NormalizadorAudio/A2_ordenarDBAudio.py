@@ -2,8 +2,8 @@ import os
 import shutil
 import re
 
-dir_origen = "AudiosPersonas"
-dir_destino = "BaseDatosOrdenada"
+dir_origen = r"C:\Users\Pablo\Documents\GitHub\DetectorHuellas-ProyectoIA\NormalizadorAudio\AudiosPersonas"
+dir_destino = r"C:\Users\Pablo\Documents\GitHub\DetectorHuellas-ProyectoIA\NormalizadorAudio\BaseDatosOrdenada"
 
 def leer_datos(ruta):
     """
