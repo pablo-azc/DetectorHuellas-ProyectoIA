@@ -1,0 +1,38 @@
+========================================================================
+REPORTE DE CONCORDANCIA Y EVALUACIÓN BIOMÉTRICA DE AUDIO
+Fecha de ejecución : 2026-11-09 17:25:32
+Umbral de distancia: 8.5
+========================================================================
+
+1. RESUMEN DE COMANDOS VÁLIDOS (RECONOCER, IDENTIFICAR, SALIR):
+  - Total muestras evaluadas     : 82
+  - Clasificados correctamente   : 77 (93.90%)
+  - Confusiones entre comandos   : 4 (4.88%)
+  - Falsos Rechazos (> umbral)   : 1 (1.22%)
+
+2. RESUMEN DE AUDIOS NO VÁLIDOS (BASURA / FUERA DE VOCABULARIO):
+  - Total muestras evaluadas     : 8
+  - Rechazadas correctamente(TRR): 2 (25.00%)
+  - Falsas Aceptaciones    (FAR): 6 (75.00%)
+
+3. LISTADO DETALLADO DE ERRORES E INCONSISTENCIAS:
+  Total de casos a revisar: 11
+  ----------------------------------------------------------------------
+  ID Muestra           | Real        | Predicho      | Dist   | Tipo                
+  ----------------------------------------------------------------------
+  Alondra_Audio11      | salir       | identificar   | 8.02   | CONFUSION_CLASE     
+  Basura_Audio1        | basura      | reconocer     | 8.06   | FALSA_ACEPTACION_BASURA
+  Basura_Audio2        | basura      | identificar   | 7.71   | FALSA_ACEPTACION_BASURA
+  Basura_Audio4        | basura      | identificar   | 8.04   | FALSA_ACEPTACION_BASURA
+  Basura_Audio6        | basura      | identificar   | 7.02   | FALSA_ACEPTACION_BASURA
+  Basura_Audio7        | basura      | reconocer     | 8.34   | FALSA_ACEPTACION_BASURA
+  Juli_Audio8          | identificar | NO_RECONOCIDO | 10.32  | FALSO_RECHAZO       
+  Juli_Audio9          | salir       | reconocer     | 6.36   | CONFUSION_CLASE     
+  Kathy_Audio4         | reconocer   | salir         | 7.03   | CONFUSION_CLASE     
+  Kathy_Audio5         | basura      | reconocer     | 5.65   | FALSA_ACEPTACION_BASURA
+  Kathy_Audio8         | identificar | reconocer     | 8.19   | CONFUSION_CLASE     
+  ----------------------------------------------------------------------
+
+4. ESTADÍSTICAS DE DISTANCIAS EUCLÍDEAS:
+  - Comandos válidos : Media=0.49, Mín=0.00, Máx=10.32, Std=1.94
+  - Audios basura    : Media=7.73, Mín=5.65, Máx=8.54, Std=0.91

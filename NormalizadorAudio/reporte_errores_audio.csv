@@ -1,0 +1,12 @@
+id_muestra,clase_real,clase_predicha,clase_mas_cercana,distancia_minima,umbral,tipo_evento,detalle
+Alondra_Audio11,salir,identificar,identificar,8.0178,8.5,CONFUSION_CLASE,Real='salir' predicho='identificar'
+Basura_Audio1,basura,reconocer,reconocer,8.0598,8.5,FALSA_ACEPTACION_BASURA,Audio de basura clasificado como 'reconocer'
+Basura_Audio2,basura,identificar,identificar,7.7104,8.5,FALSA_ACEPTACION_BASURA,Audio de basura clasificado como 'identificar'
+Basura_Audio4,basura,identificar,identificar,8.0396,8.5,FALSA_ACEPTACION_BASURA,Audio de basura clasificado como 'identificar'
+Basura_Audio6,basura,identificar,identificar,7.0164,8.5,FALSA_ACEPTACION_BASURA,Audio de basura clasificado como 'identificar'
+Basura_Audio7,basura,reconocer,reconocer,8.3354,8.5,FALSA_ACEPTACION_BASURA,Audio de basura clasificado como 'reconocer'
+Juli_Audio8,identificar,NO_RECONOCIDO,reconocer,10.3223,8.5,FALSO_RECHAZO,Real='identificar' predicho='NO_RECONOCIDO'
+Juli_Audio9,salir,reconocer,reconocer,6.3568,8.5,CONFUSION_CLASE,Real='salir' predicho='reconocer'
+Kathy_Audio4,reconocer,salir,salir,7.0278,8.5,CONFUSION_CLASE,Real='reconocer' predicho='salir'
+Kathy_Audio5,basura,reconocer,reconocer,5.6459,8.5,FALSA_ACEPTACION_BASURA,Audio de basura clasificado como 'reconocer'
+Kathy_Audio8,identificar,reconocer,reconocer,8.1935,8.5,CONFUSION_CLASE,Real='identificar' predicho='reconocer'

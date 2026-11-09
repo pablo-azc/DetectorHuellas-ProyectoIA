@@ -1,0 +1,24 @@
+======================================================================
+REPORTE DE EVALUACIÓN DE CONCORDANCIA Y SEGURIDAD BIOMÉTRICA
+Fecha de ejecución : 2026-11-08 16:08:11
+Umbral de distancia: 4
+======================================================================
+
+1. RESUMEN DE HUELLAS PERMITIDAS (AUTORIZADAS):
+  - Total evaluadas          : 60
+  - Aceptadas correctamente (TAR): 44 (73.33%)
+  - Rechazadas falsamente  (FRR): 16 (26.67%)
+
+2. RESUMEN DE HUELLAS NO PERMITIDAS (INTRUSOS / PRUEBA):
+  - Total evaluadas          : 20
+  - Rechazadas correctamente(TRR): 20 (100.00%)
+  - Falsas Aceptaciones    (FAR): 0 (0.00%)
+
+3. DETALLE DE HUELLAS NO PERMITIDAS CON FALSA ACEPTACIÓN (FAR):
+  [EXCELENTE] Ninguna huella no permitida fue aceptada como autorizada.
+
+4. ESTADÍSTICAS DE DISTANCIAS EN NO PERMITIDAS:
+  - Distancia mínima: 4.100
+  - Distancia media : 5.454
+  - Distancia máxima: 7.456
+  - Desv. estándar  : 1.080
