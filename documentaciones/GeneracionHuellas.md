@@ -22,7 +22,7 @@ Primero, se generó una base de huellas de 3 elementos, de forma que se pueda co
 Que generó las bases. Analizadas visualmente, se notan distintas.
 ### Generacion de variantes
 Luego, se toma la generación con detalles de imperfecciones, pero en otro archivo, para la base de datos
-`.\Anguli.exe -indir "VariantesPermitidas\Fingerprints" -impr -ni 20  -scratch '0 5' -noise '0 8' -trans 15 -rot 5 -outdir "VariantesPermitidas"`
+`.\Anguli.exe -indir "VariantesPermitidas\Fingerprints" -impr -ni 20  -scratch '0 5' -noise '0 8' -trans 15 -rot 10 -outdir "VariantesPermitidas"`
 Esto es, genera huellas digitales con: cortaduras, ruido, trasladadas (+-15 pixeles), y con ligeras deformaciones por rotación (+- 5°)
 ### Ordenamiento
 Este dataset es generado en carpetas del estilo ´Impresion_n/huella_i´. Se desea ´huella_i/impresion_n´, por lo que se hizo un pequeño script de Python para reordenarlas, con el siguiente prompt:
@@ -38,3 +38,13 @@ Basado en el proceso anterior, se recorta la imagen y se rota. Para lograr eso, 
 La siguiente etapa para la normalizacion es aplicar un efecto de Blur para disolver el ruido "sal y pimienta", 
 ### Binariacion
 Se consideró directamente hacer que la imagen se convierta de forma que solo queden los bordes "filosos", donde solo cuando se supere un umbral se considere "negro"
+
+## Como se ve
+### Nodulos
+para el analisis de datos que se realiza en este proyeto, los datos se transfieren a una matriz de forma, de forma de que acepten los vectores con las formas /, \ y - 
+
+
+#### NOTA:HACER UN GRAFICO DE ACEPTACION DE LAS HUELLAS
+Como seria: en un eje poner la distancia que uso para el umbral , y poner en puntitos las aceptadas y las No aceptadas (grafico lineal, uno por huella). Probar: Verde la huella, rojo intrusos, y Azul las otras si aceptadas
+
+#### Nota: hacer la matriz de confusion con intrusos
